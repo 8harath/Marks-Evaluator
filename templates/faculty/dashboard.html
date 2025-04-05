@@ -7,21 +7,21 @@
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-md-4">
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
         <div class="card bg-info bg-opacity-25 stats-card">
             <h3>{{ questions_data|length }}</h3>
             <p>Questions Created</p>
         </div>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
         <div class="card bg-primary bg-opacity-25 stats-card">
             <h3>{{ questions_data|sum(attribute='submission_count') }}</h3>
             <p>Total Submissions</p>
         </div>
     </div>
     
-    <div class="col-md-4">
+    <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
         <div class="card bg-success bg-opacity-25 stats-card">
             <h3>{{ questions_data|sum(attribute='evaluated_count') }}</h3>
             <p>Evaluated Submissions</p>
@@ -32,8 +32,8 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center">
-            <h2>Your Questions</h2>
-            <a href="{{ url_for('faculty.create_question') }}" class="btn btn-success">
+            <h2 data-aos="fade-right">Your Questions</h2>
+            <a href="{{ url_for('faculty.create_question') }}" class="btn btn-success animate__animated animate__pulse animate__infinite animate__slower" data-aos="fade-left">
                 <i class="fas fa-plus me-1"></i> Create New Question
             </a>
         </div>
@@ -44,7 +44,7 @@
 {% if questions_data %}
     <div class="row">
         {% for item in questions_data %}
-            <div class="col-md-6 col-lg-4 mb-4">
+            <div class="col-md-6 col-lg-4 mb-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
                 <div class="card bg-dark question-card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Question #{{ item.question.id }}</h5>
@@ -80,16 +80,20 @@
     </div>
 {% else %}
     <div class="row">
-        <div class="col-12">
+        <div class="col-12" data-aos="zoom-in">
             <div class="alert alert-info text-center" role="alert">
                 <h4 class="alert-heading">No Questions Created Yet</h4>
                 <p>Get started by creating your first essay question for students to answer.</p>
                 <hr>
-                <a href="{{ url_for('faculty.create_question') }}" class="btn btn-primary">
+                <a href="{{ url_for('faculty.create_question') }}" class="btn btn-primary animate__animated animate__pulse animate__infinite animate__slower">
                     <i class="fas fa-plus me-1"></i> Create Your First Question
                 </a>
             </div>
         </div>
     </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/animations.js') }}"></script>
 {% endblock %}

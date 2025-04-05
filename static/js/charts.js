@@ -2,68 +2,86 @@
  * Charts for visualizing evaluation results
  * Uses Chart.js to create bar and radar charts
  */
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Bar chart for average scores by criterion
-    const avgScoresCtx = document.getElementById('avgScoresChart');
-    if (avgScoresCtx) {
-        const labels = JSON.parse(avgScoresCtx.getAttribute('data-labels'));
-        const values = JSON.parse(avgScoresCtx.getAttribute('data-values'));
+    // Bar chart for score distribution
+    const scoreDistributionCtx = document.getElementById('scoreDistributionChart');
+    if (scoreDistributionCtx) {
+        const labels = JSON.parse(scoreDistributionCtx.dataset.labels);
+        const data = JSON.parse(scoreDistributionCtx.dataset.values);
+        const maxScore = parseInt(scoreDistributionCtx.dataset.maxScore);
         
-        new Chart(avgScoresCtx, {
+        new Chart(scoreDistributionCtx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Average Score',
-                    data: values,
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.6)',
-                        'rgba(75, 192, 192, 0.6)',
-                        'rgba(255, 206, 86, 0.6)'
-                    ],
-                    borderColor: [
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(255, 206, 86, 1)'
-                    ],
+                    label: 'Score Distribution',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100
+                        max: maxScore,
+                        title: {
+                            display: true,
+                            text: 'Total Score'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Student Submissions'
+                        }
                     }
                 },
                 plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return 'Submission #' + tooltipItems[0].label;
+                            }
+                        }
+                    },
                     legend: {
                         display: false
-                    },
-                    title: {
-                        display: true,
-                        text: 'Average Scores by Evaluation Criteria'
                     }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
                 }
             }
         });
     }
     
-    // Radar chart for individual student evaluation
-    const studentRadarCtx = document.getElementById('studentRadarChart');
-    if (studentRadarCtx) {
-        const scores = JSON.parse(studentRadarCtx.getAttribute('data-scores'));
+    // Radar chart for score dimensions
+    const dimensionsChartCtx = document.getElementById('dimensionsChart');
+    if (dimensionsChartCtx) {
+        const labels = ['Relevance', 'Coverage', 'Structure'];
+        const values = [
+            parseFloat(dimensionsChartCtx.dataset.relevance),
+            parseFloat(dimensionsChartCtx.dataset.coverage),
+            parseFloat(dimensionsChartCtx.dataset.structure)
+        ];
         
-        new Chart(studentRadarCtx, {
+        new Chart(dimensionsChartCtx, {
             type: 'radar',
             data: {
-                labels: ['Relevance', 'Coverage', 'Structure'],
+                labels: labels,
                 datasets: [{
-                    label: 'Your Scores',
-                    data: [scores.relevance, scores.coverage, scores.structure],
+                    label: 'Your Score',
+                    data: values,
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
                     pointBackgroundColor: 'rgba(75, 192, 192, 1)',
                     pointBorderColor: '#fff',
                     pointHoverBackgroundColor: '#fff',
@@ -71,81 +89,111 @@ document.addEventListener('DOMContentLoaded', function() {
                 }]
             },
             options: {
-                elements: {
-                    line: {
-                        borderWidth: 3
-                    }
-                },
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     r: {
                         angleLines: {
                             display: true
                         },
                         suggestedMin: 0,
-                        suggestedMax: 100
+                        suggestedMax: 10
                     }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw + '/10';
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
                 }
             }
         });
     }
     
-    // Distribution chart for scores
-    const scoreDistributionCtx = document.getElementById('scoreDistributionChart');
-    if (scoreDistributionCtx) {
-        const scores = JSON.parse(scoreDistributionCtx.getAttribute('data-scores'));
+    // Line chart for class average comparison
+    const comparisonChartCtx = document.getElementById('comparisonChart');
+    if (comparisonChartCtx) {
+        const dimensions = ['Relevance', 'Coverage', 'Structure', 'Total'];
+        const userScores = [
+            parseFloat(comparisonChartCtx.dataset.userRelevance),
+            parseFloat(comparisonChartCtx.dataset.userCoverage),
+            parseFloat(comparisonChartCtx.dataset.userStructure),
+            parseFloat(comparisonChartCtx.dataset.userTotal)
+        ];
+        const avgScores = [
+            parseFloat(comparisonChartCtx.dataset.avgRelevance),
+            parseFloat(comparisonChartCtx.dataset.avgCoverage),
+            parseFloat(comparisonChartCtx.dataset.avgStructure),
+            parseFloat(comparisonChartCtx.dataset.avgTotal)
+        ];
         
-        // Group scores into ranges
-        const ranges = {
-            '0-20': 0,
-            '21-40': 0,
-            '41-60': 0,
-            '61-80': 0,
-            '81-100': 0
-        };
-        
-        scores.forEach(score => {
-            if (score <= 20) ranges['0-20']++;
-            else if (score <= 40) ranges['21-40']++;
-            else if (score <= 60) ranges['41-60']++;
-            else if (score <= 80) ranges['61-80']++;
-            else ranges['81-100']++;
-        });
-        
-        new Chart(scoreDistributionCtx, {
-            type: 'pie',
+        new Chart(comparisonChartCtx, {
+            type: 'line',
             data: {
-                labels: Object.keys(ranges),
+                labels: dimensions,
                 datasets: [{
-                    data: Object.values(ranges),
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.6)',
-                        'rgba(255, 159, 64, 0.6)',
-                        'rgba(255, 205, 86, 0.6)',
-                        'rgba(75, 192, 192, 0.6)',
-                        'rgba(54, 162, 235, 0.6)'
-                    ],
-                    borderColor: [
-                        'rgb(255, 99, 132)',
-                        'rgb(255, 159, 64)',
-                        'rgb(255, 205, 86)',
-                        'rgb(75, 192, 192)',
-                        'rgb(54, 162, 235)'
-                    ],
-                    borderWidth: 1
+                    label: 'Your Score',
+                    data: userScores,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.3,
+                    fill: true
+                }, {
+                    label: 'Class Average',
+                    data: avgScores,
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    tension: 0.3,
+                    fill: true
                 }]
             },
             options: {
                 responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Score Distribution'
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Score'
+                        }
                     }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw.toFixed(1);
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutQuart'
                 }
             }
         });
     }
+    
+    // Add animation to charts when they scroll into view
+    const chartContainers = document.querySelectorAll('.chart-container');
+    chartContainers.forEach(container => {
+        container.setAttribute('data-aos', 'fade-up');
+        container.setAttribute('data-aos-duration', '1000');
+    });
 });

@@ -1,50 +1,87 @@
 {% extends "base.html" %}
 
-{% block title %}Evaluation Results - Essay Evaluation Platform{% endblock %}
+{% block title %}Results - Essay Evaluation Platform{% endblock %}
 
 {% block page_title %}Results for Question #{{ question.id }}{% endblock %}
 {% block page_subtitle %}View evaluation results and performance metrics{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-dark shadow-sm">
+    <div class="col-12 mb-4" data-aos="fade-up">
+        <div class="card bg-dark">
+            <div class="card-body">
+                <h4 class="card-title">Question</h4>
+                <p class="card-text">{{ question.text }}</p>
+                <div class="d-flex justify-content-between mt-3">
+                    <div class="small text-muted">Word Limit: {{ question.word_limit }}</div>
+                    <div class="small text-muted">Max Marks: {{ question.max_marks }}</div>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between">
+                <div>
+                    <a href="{{ url_for('faculty.view_question', question_id=question.id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye me-1"></i> View Question
+                    </a>
+                </div>
+                <div>
+                    <a href="{{ url_for('faculty.generate_pdf', question_id=question.id) }}" class="btn btn-sm btn-danger" target="_blank">
+                        <i class="fas fa-file-pdf me-1"></i> Generate PDF Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="card bg-info bg-opacity-25 stats-card">
+            <h3>{{ evaluations|length }}</h3>
+            <p>Submissions Evaluated</p>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="card bg-primary bg-opacity-25 stats-card">
+            <h3>{{ "%.1f"|format(avg_total_score) }}</h3>
+            <p>Average Score</p>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="card bg-success bg-opacity-25 stats-card">
+            <h3>{{ "%.1f"|format(highest_score) }}</h3>
+            <p>Highest Score</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-lg-6 mb-4" data-aos="fade-right">
+        <div class="card bg-dark h-100">
             <div class="card-header">
-                <h4 class="mb-0">Question Summary</h4>
+                <h4 class="card-title mb-0">Score Distribution</h4>
             </div>
             <div class="card-body">
-                <p class="card-text">{{ question.text|truncate(200) }}</p>
-                <div class="row mt-3">
-                    <div class="col-md-4">
-                        <div class="card bg-secondary bg-opacity-10">
-                            <div class="card-body py-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>Word Limit:</span>
-                                    <span class="badge bg-primary">{{ question.word_limit }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-secondary bg-opacity-10">
-                            <div class="card-body py-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>Maximum Marks:</span>
-                                    <span class="badge bg-success">{{ question.max_marks }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card bg-secondary bg-opacity-10">
-                            <div class="card-body py-2">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>Submissions:</span>
-                                    <span class="badge bg-info">{{ evaluations|length }}/5</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="chart-container">
+                    <canvas id="scoreDistributionChart" 
+                            data-labels="{{ range(1, evaluations|length + 1)|list|tojson }}" 
+                            data-values="{{ evaluations|map(attribute='total_score')|list|tojson }}"
+                            data-max-score="{{ question.max_marks }}"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4" data-aos="fade-left">
+        <div class="card bg-dark h-100">
+            <div class="card-header">
+                <h4 class="card-title mb-0">Average Dimension Scores</h4>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="dimensionsAverageChart" 
+                            data-relevance="{{ avg_relevance_score }}" 
+                            data-coverage="{{ avg_coverage_score }}"
+                            data-structure="{{ avg_structure_score }}"></canvas>
                 </div>
             </div>
         </div>
@@ -52,140 +89,238 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-8">
-        <div class="card bg-dark shadow-sm h-100">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Evaluation Results</h4>
-                    <a href="{{ url_for('faculty.generate_pdf', question_id=question.id) }}" class="btn btn-sm btn-outline-light">
-                        <i class="fas fa-file-pdf me-1"></i> Export PDF
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Student</th>
-                                <th>Score</th>
-                                <th>Relevance</th>
-                                <th>Coverage</th>
-                                <th>Structure</th>
-                                <th>Submission Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for evaluation in evaluations %}
-                                <tr>
-                                    <td>{{ evaluation.rank }}</td>
-                                    <td>{{ evaluation.submission.student.username }}</td>
-                                    <td>
-                                        <span class="badge {% if evaluation.total_score >= question.max_marks * 0.8 %}bg-success{% elif evaluation.total_score >= question.max_marks * 0.6 %}bg-warning{% else %}bg-danger{% endif %}">
-                                            {{ "%.1f"|format(evaluation.total_score) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ "%.1f"|format(evaluation.relevance_score) }}</td>
-                                    <td>{{ "%.1f"|format(evaluation.coverage_score) }}</td>
-                                    <td>{{ "%.1f"|format(evaluation.structure_score) }}</td>
-                                    <td>{{ evaluation.submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="card bg-dark shadow-sm h-100">
-            <div class="card-header">
-                <h4 class="mb-0">Performance Analytics</h4>
-            </div>
-            <div class="card-body">
-                <!-- Average Scores by Criteria Chart -->
-                <div class="mb-4">
-                    <canvas id="avgScoresChart" 
-                           data-labels="{{ chart_data.labels|tojson }}" 
-                           data-values="{{ chart_data.values|tojson }}"></canvas>
-                </div>
-                
-                <!-- Statistics -->
-                <div class="mt-4">
-                    <h5>Statistics</h5>
-                    <div class="row mt-3">
-                        <div class="col-6">
-                            <div class="card bg-secondary bg-opacity-10 mb-3">
-                                <div class="card-body py-2">
-                                    <div class="d-flex flex-column text-center">
-                                        <small>Average Score</small>
-                                        <span class="badge bg-info">
-                                            {{ "%.1f"|format(evaluations|map(attribute='total_score')|sum / evaluations|length) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="card bg-secondary bg-opacity-10 mb-3">
-                                <div class="card-body py-2">
-                                    <div class="d-flex flex-column text-center">
-                                        <small>Highest Score</small>
-                                        <span class="badge bg-success">
-                                            {{ "%.1f"|format(evaluations|map(attribute='total_score')|max) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="card bg-secondary bg-opacity-10">
-                                <div class="card-body py-2">
-                                    <div class="d-flex flex-column text-center">
-                                        <small>Lowest Score</small>
-                                        <span class="badge bg-danger">
-                                            {{ "%.1f"|format(evaluations|map(attribute='total_score')|min) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="card bg-secondary bg-opacity-10">
-                                <div class="card-body py-2">
-                                    <div class="d-flex flex-column text-center">
-                                        <small>Submissions</small>
-                                        <span class="badge bg-secondary">
-                                            {{ evaluations|length }}/5
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="col-12">
+        <h3 data-aos="fade-up">Student Submissions</h3>
+        <hr>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <a href="{{ url_for('faculty.view_question', question_id=question.id) }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Back to Question
-            </a>
-            
-            <a href="{{ url_for('faculty.generate_pdf', question_id=question.id) }}" class="btn btn-primary">
-                <i class="fas fa-file-pdf me-1"></i> Download Results as PDF
-            </a>
+    {% for evaluation in evaluations %}
+        <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+            <div class="card bg-dark result-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-0">{{ evaluation.submission.student.username }}</h5>
+                        <div class="small text-muted">Submitted: {{ evaluation.submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                    </div>
+                    <div>
+                        <span class="badge {% if evaluation.total_score >= question.max_marks * 0.8 %}bg-success{% elif evaluation.total_score >= question.max_marks * 0.6 %}bg-warning{% else %}bg-danger{% endif %} fs-6">
+                            {{ "%.1f"|format(evaluation.total_score) }}/{{ question.max_marks }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="dimension-score bg-info bg-opacity-10">
+                                <div class="d-flex justify-content-between">
+                                    <span>Relevance:</span>
+                                    <span class="fw-bold">{{ "%.1f"|format(evaluation.relevance_score) }}/10</span>
+                                </div>
+                                <div class="progress mt-2" style="height: 5px;">
+                                    <div class="progress-bar bg-info" style="width: {{ (evaluation.relevance_score / 10) * 100 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="dimension-score bg-primary bg-opacity-10">
+                                <div class="d-flex justify-content-between">
+                                    <span>Coverage:</span>
+                                    <span class="fw-bold">{{ "%.1f"|format(evaluation.coverage_score) }}/10</span>
+                                </div>
+                                <div class="progress mt-2" style="height: 5px;">
+                                    <div class="progress-bar bg-primary" style="width: {{ (evaluation.coverage_score / 10) * 100 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="dimension-score bg-success bg-opacity-10">
+                                <div class="d-flex justify-content-between">
+                                    <span>Structure:</span>
+                                    <span class="fw-bold">{{ "%.1f"|format(evaluation.structure_score) }}/10</span>
+                                </div>
+                                <div class="progress mt-2" style="height: 5px;">
+                                    <div class="progress-bar bg-success" style="width: {{ (evaluation.structure_score / 10) * 100 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Student's Answer:</h6>
+                        <div class="p-2 bg-secondary bg-opacity-10 rounded" style="max-height: 200px; overflow-y: auto;">
+                            {{ evaluation.submission.answer_text|truncate(300) }}
+                        </div>
+                    </div>
+                    
+                    {% if evaluation.feedback %}
+                        <div>
+                            <h6>AI Feedback:</h6>
+                            <div class="p-2 bg-secondary bg-opacity-10 rounded" style="max-height: 150px; overflow-y: auto;">
+                                {{ evaluation.feedback|truncate(200) }}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <div>
+                        <span class="badge bg-secondary">Rank: #{{ evaluation.rank }}</span>
+                        <span class="badge bg-info ms-2">Words: {{ evaluation.submission.word_count }}</span>
+                    </div>
+                    <a href="#submissionModal{{ evaluation.submission.id }}" data-bs-toggle="modal" class="btn btn-sm btn-primary">
+                        <i class="fas fa-search-plus me-1"></i> View Full
+                    </a>
+                </div>
+            </div>
         </div>
-    </div>
+        
+        <!-- Modal for full submission -->
+        <div class="modal fade" id="submissionModal{{ evaluation.submission.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content bg-dark">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ evaluation.submission.student.username }}'s Submission</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <h6>Student's Answer:</h6>
+                            <div class="p-3 bg-secondary bg-opacity-10 rounded">
+                                {{ evaluation.submission.answer_text|nl2br }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="dimension-score bg-info bg-opacity-10">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Relevance:</span>
+                                        <span class="fw-bold">{{ "%.1f"|format(evaluation.relevance_score) }}/10</span>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 8px;">
+                                        <div class="progress-bar bg-info" style="width: {{ (evaluation.relevance_score / 10) * 100 }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="dimension-score bg-primary bg-opacity-10">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Coverage:</span>
+                                        <span class="fw-bold">{{ "%.1f"|format(evaluation.coverage_score) }}/10</span>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 8px;">
+                                        <div class="progress-bar bg-primary" style="width: {{ (evaluation.coverage_score / 10) * 100 }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="dimension-score bg-success bg-opacity-10">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Structure:</span>
+                                        <span class="fw-bold">{{ "%.1f"|format(evaluation.structure_score) }}/10</span>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: {{ (evaluation.structure_score / 10) * 100 }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Total Score:</h6>
+                            <div class="progress" style="height: 15px;">
+                                <div class="progress-bar {% if evaluation.total_score >= question.max_marks * 0.8 %}bg-success{% elif evaluation.total_score >= question.max_marks * 0.6 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                     style="width: {{ (evaluation.total_score / question.max_marks) * 100 }}%">
+                                    {{ "%.1f"|format(evaluation.total_score) }}/{{ question.max_marks }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if evaluation.feedback %}
+                            <div class="mt-4">
+                                <h6>AI Feedback:</h6>
+                                <div class="p-3 bg-secondary bg-opacity-10 rounded">
+                                    {{ evaluation.feedback|nl2br }}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Additional chart for faculty results page
+        const dimensionsAverageCtx = document.getElementById('dimensionsAverageChart');
+        if (dimensionsAverageCtx) {
+            const labels = ['Relevance', 'Coverage', 'Structure'];
+            const values = [
+                parseFloat(dimensionsAverageCtx.dataset.relevance),
+                parseFloat(dimensionsAverageCtx.dataset.coverage),
+                parseFloat(dimensionsAverageCtx.dataset.structure)
+            ];
+            
+            new Chart(dimensionsAverageCtx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Class Average',
+                        data: values,
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(255, 159, 64, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + '/10';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

@@ -14,6 +14,12 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     
@@ -122,6 +128,17 @@
                 <div class="col-md-6 text-center text-md-start">
                     <img src="{{ url_for('static', filename='assets/jain_university_logo.svg') }}" height="40" alt="Jain University Logo" class="mb-2">
                     <p class="small mb-0">This project is built by a student from Jain University</p>
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS animations
+        document.addEventListener("DOMContentLoaded", function() {
+            AOS.init({
+                duration: 800,
+                easing: "ease-in-out"
+            });
+        });
+    </script>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
                     <p class="mb-0">&copy; {{ now.year }} Essay Evaluation Platform</p>
