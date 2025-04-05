@@ -104,4 +104,6 @@ The application properly renders paragraphs and line breaks across all interface
 MIT License
 
 ## Credits
-Developed for Jain University's academic evaluation system
+Developed by Bharath K
+https://8harath.me/
+8harath.k@gmail.com
