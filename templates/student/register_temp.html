@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Student Information - Essay Evaluation Platform{% endblock %}
+
+{% block page_title %}Student Information{% endblock %}
+{% block page_subtitle %}Please provide your details to continue{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card bg-dark shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">Question #{{ question.id }}</h4>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">{{ question.text|truncate(200) }}</p>
+                
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span>To submit your answer, please provide your name and email address.</span>
+                </div>
+                
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">{{ form.name.label }}</label>
+                        {% if form.name.errors %}
+                            {{ form.name(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.name(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="email" class="form-label">{{ form.email.label }}</label>
+                        {% if form.email.errors %}
+                            {{ form.email(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.email(class="form-control") }}
+                        {% endif %}
+                        <div class="form-text">Your email is used to identify your submission.</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('student.view_question', question_id=question.id) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </a>
+                        
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <p class="small text-muted">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a> to track all your submissions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

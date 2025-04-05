@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation Results - Essay Evaluation Platform{% endblock %}
+
+{% block page_title %}Results for Question #{{ question.id }}{% endblock %}
+{% block page_subtitle %}View evaluation results and performance metrics{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-dark shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">Question Summary</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ question.text|truncate(200) }}</p>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="card bg-secondary bg-opacity-10">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Word Limit:</span>
+                                    <span class="badge bg-primary">{{ question.word_limit }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-secondary bg-opacity-10">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Maximum Marks:</span>
+                                    <span class="badge bg-success">{{ question.max_marks }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-secondary bg-opacity-10">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Submissions:</span>
+                                    <span class="badge bg-info">{{ evaluations|length }}/5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card bg-dark shadow-sm h-100">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Evaluation Results</h4>
+                    <a href="{{ url_for('faculty.generate_pdf', question_id=question.id) }}" class="btn btn-sm btn-outline-light">
+                        <i class="fas fa-file-pdf me-1"></i> Export PDF
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Student</th>
+                                <th>Score</th>
+                                <th>Relevance</th>
+                                <th>Coverage</th>
+                                <th>Structure</th>
+                                <th>Submission Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for evaluation in evaluations %}
+                                <tr>
+                                    <td>{{ evaluation.rank }}</td>
+                                    <td>{{ evaluation.submission.student.username }}</td>
+                                    <td>
+                                        <span class="badge {% if evaluation.total_score >= question.max_marks * 0.8 %}bg-success{% elif evaluation.total_score >= question.max_marks * 0.6 %}bg-warning{% else %}bg-danger{% endif %}">
+                                            {{ "%.1f"|format(evaluation.total_score) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ "%.1f"|format(evaluation.relevance_score) }}</td>
+                                    <td>{{ "%.1f"|format(evaluation.coverage_score) }}</td>
+                                    <td>{{ "%.1f"|format(evaluation.structure_score) }}</td>
+                                    <td>{{ evaluation.submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-dark shadow-sm h-100">
+            <div class="card-header">
+                <h4 class="mb-0">Performance Analytics</h4>
+            </div>
+            <div class="card-body">
+                <!-- Average Scores by Criteria Chart -->
+                <div class="mb-4">
+                    <canvas id="avgScoresChart" 
+                           data-labels="{{ chart_data.labels|tojson }}" 
+                           data-values="{{ chart_data.values|tojson }}"></canvas>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="mt-4">
+                    <h5>Statistics</h5>
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <div class="card bg-secondary bg-opacity-10 mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex flex-column text-center">
+                                        <small>Average Score</small>
+                                        <span class="badge bg-info">
+                                            {{ "%.1f"|format(evaluations|map(attribute='total_score')|sum / evaluations|length) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-secondary bg-opacity-10 mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex flex-column text-center">
+                                        <small>Highest Score</small>
+                                        <span class="badge bg-success">
+                                            {{ "%.1f"|format(evaluations|map(attribute='total_score')|max) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-secondary bg-opacity-10">
+                                <div class="card-body py-2">
+                                    <div class="d-flex flex-column text-center">
+                                        <small>Lowest Score</small>
+                                        <span class="badge bg-danger">
+                                            {{ "%.1f"|format(evaluations|map(attribute='total_score')|min) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card bg-secondary bg-opacity-10">
+                                <div class="card-body py-2">
+                                    <div class="d-flex flex-column text-center">
+                                        <small>Submissions</small>
+                                        <span class="badge bg-secondary">
+                                            {{ evaluations|length }}/5
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ url_for('faculty.view_question', question_id=question.id) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Question
+            </a>
+            
+            <a href="{{ url_for('faculty.generate_pdf', question_id=question.id) }}" class="btn btn-primary">
+                <i class="fas fa-file-pdf me-1"></i> Download Results as PDF
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

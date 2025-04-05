@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Answer - Essay Evaluation Platform{% endblock %}
+
+{% block page_title %}Submit Your Answer{% endblock %}
+{% block page_subtitle %}Question #{{ question.id }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="card bg-dark shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">Question</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ question.text }}</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-secondary bg-opacity-10">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Word Limit:</span>
+                                    <span class="badge bg-primary">{{ question.word_limit }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary bg-opacity-10">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Maximum Marks:</span>
+                                    <span class="badge bg-success">{{ question.max_marks }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card bg-dark shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">Your Answer</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {% if form.answer_text.errors %}
+                            {{ form.answer_text(class="form-control is-invalid", rows=15) }}
+                            <div class="invalid-feedback">
+                                {% for error in form.answer_text.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.answer_text(class="form-control", rows=15, placeholder="Type your answer here...") }}
+                        {% endif %}
+                        
+                        <div id="word_counter" data-limit="{{ question.word_limit }}" class="word-counter mt-2">
+                            0 / {{ question.word_limit }} words
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> You cannot edit your answer after submission. Please review carefully before submitting.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('student.view_question', question_id=question.id) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Back
+                        </a>
+                        
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/wordCount.js') }}"></script>
+{% endblock %}

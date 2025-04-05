@@ -1,0 +1,102 @@
+/* Additional custom styling to complement Bootstrap */
+
+/* General styling */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+    padding: 20px 0;
+    text-align: center;
+}
+
+/* Form styling */
+.word-counter {
+    font-size: 0.9rem;
+    margin-top: 5px;
+    transition: color 0.3s;
+}
+
+.word-counter.warning {
+    color: var(--bs-warning);
+}
+
+.word-counter.danger {
+    color: var(--bs-danger);
+}
+
+/* Card modifications */
+.question-card {
+    transition: transform 0.2s;
+    margin-bottom: 20px;
+    height: 100%;
+}
+
+.question-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard stats */
+.stats-card {
+    text-align: center;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.stats-card h3 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.stats-card p {
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+/* Results section */
+.evaluation-details {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.score-badge {
+    font-size: 1.2rem;
+    padding: 8px 15px;
+}
+
+/* Faculty question management */
+.submissions-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.9rem;
+}
+
+/* Responsive text area */
+textarea.form-control {
+    min-height: 200px;
+}
+
+/* Custom badges for evaluation categories */
+.badge-relevance {
+    background-color: var(--bs-primary);
+}
+
+.badge-coverage {
+    background-color: var(--bs-success);
+}
+
+.badge-structure {
+    background-color: var(--bs-info);
+}

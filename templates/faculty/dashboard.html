@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Dashboard - Essay Evaluation Platform{% endblock %}
+
+{% block page_title %}Faculty Dashboard{% endblock %}
+{% block page_subtitle %}Manage your questions and view student submissions{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-info bg-opacity-25 stats-card">
+            <h3>{{ questions_data|length }}</h3>
+            <p>Questions Created</p>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-primary bg-opacity-25 stats-card">
+            <h3>{{ questions_data|sum(attribute='submission_count') }}</h3>
+            <p>Total Submissions</p>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-success bg-opacity-25 stats-card">
+            <h3>{{ questions_data|sum(attribute='evaluated_count') }}</h3>
+            <p>Evaluated Submissions</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Your Questions</h2>
+            <a href="{{ url_for('faculty.create_question') }}" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i> Create New Question
+            </a>
+        </div>
+        <hr>
+    </div>
+</div>
+
+{% if questions_data %}
+    <div class="row">
+        {% for item in questions_data %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card bg-dark question-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Question #{{ item.question.id }}</h5>
+                        <span class="badge {% if item.submission_count >= 5 %}bg-danger{% elif item.submission_count > 0 %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ item.submission_count }}/5 Submissions
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ item.question.text|truncate(150) }}</p>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Word Limit: {{ item.question.word_limit }}</small>
+                            <small class="text-muted">Max Marks: {{ item.question.max_marks }}</small>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Created {{ item.question.created_at.strftime('%Y-%m-%d') }}</small>
+                            <div>
+                                {% if item.evaluated_count > 0 %}
+                                    <a href="{{ url_for('faculty.results', question_id=item.question.id) }}" class="btn btn-sm btn-info me-1">
+                                        <i class="fas fa-chart-bar me-1"></i> Results
+                                    </a>
+                                {% endif %}
+                                <a href="{{ url_for('faculty.view_question', question_id=item.question.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye me-1"></i> View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info text-center" role="alert">
+                <h4 class="alert-heading">No Questions Created Yet</h4>
+                <p>Get started by creating your first essay question for students to answer.</p>
+                <hr>
+                <a href="{{ url_for('faculty.create_question') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i> Create Your First Question
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

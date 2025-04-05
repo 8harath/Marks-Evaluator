@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Question Details - Essay Evaluation Platform{% endblock %}
+
+{% block page_title %}Question Details{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-8 mx-auto">
+        <div class="card bg-dark shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">Question #{{ question.id }}</h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">{{ question.text }}</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card bg-secondary bg-opacity-10">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Word Limit:</span>
+                                    <span class="badge bg-primary">{{ question.word_limit }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-secondary bg-opacity-10">
+                            <div class="card-body py-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Maximum Marks:</span>
+                                    <span class="badge bg-success">{{ question.max_marks }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-4" role="alert">
+                    <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Submission Guidelines</h5>
+                    <p>Please ensure your answer addresses the question completely. You will not be able to edit your response after submission.</p>
+                    <hr>
+                    <ul class="mb-0">
+                        <li>Your answer must not exceed {{ question.word_limit }} words.</li>
+                        <li>You will be evaluated on relevance, coverage, and structure.</li>
+                        <li>Only one submission is allowed per student for each question.</li>
+                        <li>Once evaluated, you can view your results and ranking.</li>
+                    </ul>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Questions
+                    </a>
+                    
+                    <a href="{{ url_for('student.submit_answer', question_id=question.id) }}" class="btn btn-primary">
+                        <i class="fas fa-pencil-alt me-1"></i> Submit Your Answer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

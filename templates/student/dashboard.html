@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - Essay Evaluation Platform{% endblock %}
+
+{% block page_title %}{% if current_user.is_authenticated and current_user.role == 'student' %}Student Dashboard{% else %}Available Questions{% endif %}{% endblock %}
+{% block page_subtitle %}Browse and respond to essay questions{% endblock %}
+
+{% block content %}
+{% if current_user.is_authenticated and current_user.role == 'student' %}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-info bg-opacity-25 stats-card">
+                <h3>{{ questions_data|length }}</h3>
+                <p>Available Questions</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-primary bg-opacity-25 stats-card">
+                <h3>{{ questions_data|selectattr('has_submitted', 'eq', true)|list|length }}</h3>
+                <p>Your Submissions</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-success bg-opacity-25 stats-card">
+                <h3>{{ questions_data|selectattr('evaluation', 'defined')|selectattr('evaluation', 'ne', none)|list|length }}</h3>
+                <p>Evaluated Submissions</p>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Available Questions</h2>
+            {% if current_user.is_authenticated and current_user.role == 'student' %}
+                <a href="{{ url_for('student.results') }}" class="btn btn-primary">
+                    <i class="fas fa-chart-bar me-1"></i> View My Results
+                </a>
+            {% endif %}
+        </div>
+        <hr>
+    </div>
+</div>
+
+{% if questions_data %}
+    <div class="row">
+        {% for item in questions_data %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card bg-dark question-card h-100">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Question #{{ item.question.id }}</h5>
+                            <span class="badge {% if item.submission_count >= 5 %}bg-danger{% elif item.submission_count > 0 %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ item.submission_count }}/5 Submissions
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ item.question.text|truncate(150) }}</p>
+                        
+                        <div class="d-flex justify-content-between mt-3">
+                            <span class="badge bg-info">Word Limit: {{ item.question.word_limit }}</span>
+                            <span class="badge bg-warning">Max Marks: {{ item.question.max_marks }}</span>
+                        </div>
+                        
+                        {% if item.has_submitted and item.evaluation %}
+                            <div class="mt-3 p-2 bg-secondary bg-opacity-10 rounded">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Your score:</span>
+                                    <span class="badge {% if item.evaluation.total_score >= item.question.max_marks * 0.8 %}bg-success{% elif item.evaluation.total_score >= item.question.max_marks * 0.6 %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ "%.1f"|format(item.evaluation.total_score) }}/{{ item.question.max_marks }}
+                                    </span>
+                                </div>
+                                {% if item.evaluation.rank %}
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <span>Rank:</span>
+                                        <span class="badge bg-primary">#{{ item.evaluation.rank }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if item.has_submitted %}
+                                <span class="badge bg-success">Submitted</span>
+                                
+                                {% if item.evaluation %}
+                                    <a href="{{ url_for('student.results') }}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-chart-bar me-1"></i> View Results
+                                    </a>
+                                {% else %}
+                                    <span class="badge bg-secondary">Pending Evaluation</span>
+                                {% endif %}
+                            {% elif item.can_submit %}
+                                <span class="badge bg-primary">Open for Submission</span>
+                                <a href="{{ url_for('student.view_question', question_id=item.question.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-pencil-alt me-1"></i> Submit Answer
+                                </a>
+                            {% else %}
+                                <span class="badge bg-danger">Closed</span>
+                                <a href="{{ url_for('student.view_question', question_id=item.question.id) }}" class="btn btn-sm btn-secondary disabled">
+                                    <i class="fas fa-eye me-1"></i> View Question
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info text-center" role="alert">
+        <h4 class="alert-heading">No Questions Available</h4>
+        <p>There are currently no essay questions available for submission.</p>
+        <hr>
+        <p class="mb-0">Please check back later.</p>
+    </div>
+{% endif %}
+{% endblock %}

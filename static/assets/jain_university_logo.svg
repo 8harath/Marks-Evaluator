@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150">
+  <style>
+    .university-name { fill: #003366; font-family: Arial, sans-serif; font-weight: bold; }
+    .logo-emblem { fill: #003366; }
+    .tagline { fill: #666666; font-family: Arial, sans-serif; font-style: italic; font-size: 14px; }
+  </style>
+  
+  <!-- Emblem/Symbol -->
+  <path class="logo-emblem" d="M100,30 C80,30 65,45 65,65 C65,85 80,100 100,100 C120,100 135,85 135,65 C135,45 120,30 100,30 Z M100,90 C85,90 75,80 75,65 C75,50 85,40 100,40 C115,40 125,50 125,65 C125,80 115,90 100,90 Z"/>
+  
+  <path class="logo-emblem" d="M100,50 L100,80 M85,65 L115,65" stroke="#003366" stroke-width="6" fill="none"/>
+  
+  <!-- University Name -->
+  <text x="150" y="70" class="university-name" font-size="30">JAIN UNIVERSITY</text>
+  
+  <!-- Tagline -->
+  <text x="150" y="95" class="tagline">A Place to Learn, A Chance to Grow</text>
+</svg>

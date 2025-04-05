@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}My Results - Essay Evaluation Platform{% endblock %}
+
+{% block page_title %}My Results{% endblock %}
+{% block page_subtitle %}View your evaluated submissions and performance feedback{% endblock %}
+
+{% block content %}
+{% if results_data %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-3">Performance Summary</h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-info bg-opacity-25 stats-card">
+                                <h3>{{ results_data|length }}</h3>
+                                <p>Evaluated Submissions</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card bg-success bg-opacity-25 stats-card">
+                                <h3>{{ "%.1f"|format(results_data|map(attribute='evaluation.total_score')|sum / results_data|length) }}</h3>
+                                <p>Average Score</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card bg-primary bg-opacity-25 stats-card">
+                                <h3>{{ "%.1f"|format(results_data|map(attribute='evaluation.total_score')|max) }}</h3>
+                                <p>Highest Score</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for result in results_data %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark shadow-sm">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Question #{{ result.question.id }}</h4>
+                        <span class="badge score-badge {% if result.evaluation.total_score >= result.question.max_marks * 0.8 %}bg-success{% elif result.evaluation.total_score >= result.question.max_marks * 0.6 %}bg-warning{% else %}bg-danger{% endif %}">
+                            {{ "%.1f"|format(result.evaluation.total_score) }}/{{ result.question.max_marks }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Question</h5>
+                        <p>{{ result.question.text }}</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Your Answer</h5>
+                        <p>{{ result.submission.answer_text }}</p>
+                        <div class="text-muted small">
+                            <span>Word count: {{ result.submission.word_count }}</span> | 
+                            <span>Submitted: {{ result.submission.submitted_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Evaluation Results</h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="evaluation-details">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <span class="badge bg-primary mb-2">Relevance</span>
+                                                <h4>{{ "%.1f"|format(result.evaluation.relevance_score) }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <span class="badge bg-success mb-2">Coverage</span>
+                                                <h4>{{ "%.1f"|format(result.evaluation.coverage_score) }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <span class="badge bg-info mb-2">Structure</span>
+                                                <h4>{{ "%.1f"|format(result.evaluation.structure_score) }}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3">
+                                        <h6>Feedback:</h6>
+                                        <p>{{ result.evaluation.feedback }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="card bg-secondary bg-opacity-10 h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-center mb-3">Your Performance</h6>
+                                        
+                                        <!-- Radar chart showing student's scores -->
+                                        <canvas id="studentRadarChart" 
+                                                data-scores='{"relevance": {{ result.evaluation.relevance_score }}, "coverage": {{ result.evaluation.coverage_score }}, "structure": {{ result.evaluation.structure_score }}}'>
+                                        </canvas>
+                                        
+                                        <div class="mt-3 text-center">
+                                            <div class="d-flex justify-content-between">
+                                                <span>Rank:</span>
+                                                <span class="badge bg-primary">#{{ result.evaluation.rank }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between mt-2">
+                                                <span>Evaluated:</span>
+                                                <span class="text-muted small">{{ result.evaluation.evaluated_at.strftime('%Y-%m-%d') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-info text-center" role="alert">
+        <h4 class="alert-heading">No Results Yet</h4>
+        <p>You don't have any evaluated submissions yet. Either you haven't submitted any answers, or your submissions are waiting to be evaluated by faculty.</p>
+        <hr>
+        <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary">
+            <i class="fas fa-pencil-alt me-1"></i> Browse Available Questions
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+{% endblock %}

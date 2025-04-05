@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Essay Evaluation Platform{% endblock %}
+
+{% block page_title %}Academic Essay Evaluation Platform{% endblock %}
+{% block page_subtitle %}Powered by AI to provide objective assessment of student essays{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-md-6">
+        <div class="card bg-dark shadow-sm h-100">
+            <div class="card-body">
+                <h3 class="card-title mb-3">Welcome to the Essay Evaluation Platform</h3>
+                <p class="card-text">
+                    Our platform offers a seamless way to create, submit, and evaluate academic essays. Utilizing the power of Google's Gemini API, 
+                    we provide objective, consistent, and detailed evaluations based on relevance, coverage, and structure.
+                </p>
+                <p class="card-text">
+                    Whether you're a faculty member looking to assess student work or a student eager to submit your response,
+                    our platform streamlines the entire process.
+                </p>
+                
+                <div class="mt-4">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'faculty' %}
+                            <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-primary me-2">
+                                <i class="fas fa-chalkboard-teacher me-1"></i> Faculty Dashboard
+                            </a>
+                            <a href="{{ url_for('faculty.create_question') }}" class="btn btn-outline-light">
+                                <i class="fas fa-plus me-1"></i> Create New Question
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary me-2">
+                                <i class="fas fa-book-reader me-1"></i> View Questions
+                            </a>
+                            <a href="{{ url_for('student.results') }}" class="btn btn-outline-light">
+                                <i class="fas fa-chart-bar me-1"></i> My Results
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light me-2">
+                            <i class="fas fa-user-plus me-1"></i> Register
+                        </a>
+                        <a href="{{ url_for('student.dashboard') }}" class="btn btn-success">
+                            <i class="fas fa-pencil-alt me-1"></i> Submit an Answer
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card bg-dark shadow-sm h-100">
+            <div class="card-body">
+                <h3 class="card-title mb-3">Key Features</h3>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5><i class="fas fa-users text-info me-2"></i> For Faculty</h5>
+                            <ul class="list-unstyled ps-4">
+                                <li><i class="fas fa-check text-success me-2"></i> Create essay questions</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Provide reference answers</li>
+                                <li><i class="fas fa-check text-success me-2"></i> AI-powered evaluation</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Generate PDF reports</li>
+                                <li><i class="fas fa-check text-success me-2"></i> View student rankings</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h5><i class="fas fa-user-graduate text-warning me-2"></i> For Students</h5>
+                            <ul class="list-unstyled ps-4">
+                                <li><i class="fas fa-check text-success me-2"></i> Browse available questions</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Submit detailed responses</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Real-time word count</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Receive objective feedback</li>
+                                <li><i class="fas fa-check text-success me-2"></i> View performance ranking</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h5><i class="fas fa-brain text-danger me-2"></i> Evaluation Criteria</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-primary bg-opacity-25 mb-2">
+                                <div class="card-body py-2 px-3 text-center">
+                                    <h6 class="mb-0">Relevance</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success bg-opacity-25 mb-2">
+                                <div class="card-body py-2 px-3 text-center">
+                                    <h6 class="mb-0">Coverage</h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-info bg-opacity-25 mb-2">
+                                <div class="card-body py-2 px-3 text-center">
+                                    <h6 class="mb-0">Structure</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-dark shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">How It Works</h3>
+                
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <div class="bg-info bg-opacity-25 mx-auto mb-3" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-pencil-alt fa-2x text-info"></i>
+                            </div>
+                            <h5>Create Questions</h5>
+                            <p class="small">Faculty creates essay questions with reference answers</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <div class="bg-primary bg-opacity-25 mx-auto mb-3" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-paper-plane fa-2x text-primary"></i>
+                            </div>
+                            <h5>Student Submissions</h5>
+                            <p class="small">Students submit responses within word limits</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <div class="bg-warning bg-opacity-25 mx-auto mb-3" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-robot fa-2x text-warning"></i>
+                            </div>
+                            <h5>AI Evaluation</h5>
+                            <p class="small">Gemini API assesses submissions against reference answers</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <div class="bg-success bg-opacity-25 mx-auto mb-3" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-chart-line fa-2x text-success"></i>
+                            </div>
+                            <h5>Results & Analysis</h5>
+                            <p class="small">Detailed scoring, rankings, and performance analysis</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
