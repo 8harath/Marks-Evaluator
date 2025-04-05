@@ -196,28 +196,42 @@ def results(question_id):
         return redirect(url_for('faculty.view_question', question_id=question.id))
     
     # Prepare data for chart (average scores by criterion)
-    avg_relevance = db.session.query(func.avg(Evaluation.relevance_score)).join(Submission).filter(
+    avg_relevance_score = db.session.query(func.avg(Evaluation.relevance_score)).join(Submission).filter(
         Submission.question_id == question.id
     ).scalar() or 0
     
-    avg_coverage = db.session.query(func.avg(Evaluation.coverage_score)).join(Submission).filter(
+    avg_coverage_score = db.session.query(func.avg(Evaluation.coverage_score)).join(Submission).filter(
         Submission.question_id == question.id
     ).scalar() or 0
     
-    avg_structure = db.session.query(func.avg(Evaluation.structure_score)).join(Submission).filter(
+    avg_structure_score = db.session.query(func.avg(Evaluation.structure_score)).join(Submission).filter(
+        Submission.question_id == question.id
+    ).scalar() or 0
+    
+    # Calculate average total score and highest score
+    avg_total_score = db.session.query(func.avg(Evaluation.total_score)).join(Submission).filter(
+        Submission.question_id == question.id
+    ).scalar() or 0
+    
+    highest_score = db.session.query(func.max(Evaluation.total_score)).join(Submission).filter(
         Submission.question_id == question.id
     ).scalar() or 0
     
     chart_data = {
         'labels': ['Relevance', 'Coverage', 'Structure'],
-        'values': [avg_relevance, avg_coverage, avg_structure]
+        'values': [avg_relevance_score, avg_coverage_score, avg_structure_score]
     }
     
     return render_template('faculty/results.html',
                            title='Evaluation Results',
                            question=question,
                            evaluations=evaluations,
-                           chart_data=chart_data)
+                           chart_data=chart_data,
+                           avg_relevance_score=avg_relevance_score,
+                           avg_coverage_score=avg_coverage_score,
+                           avg_structure_score=avg_structure_score,
+                           avg_total_score=avg_total_score,
+                           highest_score=highest_score)
 
 @faculty_bp.route('/question/<int:question_id>/generate_pdf')
 @login_required
