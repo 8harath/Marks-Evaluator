@@ -4,6 +4,7 @@ from app import db
 from sqlalchemy import func
 from models import Question, Submission, Evaluation, Student
 from forms import QuestionForm
+from flask_wtf import FlaskForm
 from services.evaluation import evaluate_submissions
 from services.pdf_generator import generate_results_pdf
 import logging
@@ -75,11 +76,15 @@ def view_question(question_id):
     # Check if all submissions have been evaluated
     all_evaluated = all(submission.evaluation is not None for submission in submissions)
     
+    # Create a simple form for CSRF protection
+    form = FlaskForm()
+    
     return render_template('faculty/view_question.html', 
                            title='Question Details', 
                            question=question,
                            submissions=submissions,
-                           all_evaluated=all_evaluated)
+                           all_evaluated=all_evaluated,
+                           form=form)
 
 @faculty_bp.route('/question/<int:question_id>/update', methods=['GET', 'POST'])
 @login_required

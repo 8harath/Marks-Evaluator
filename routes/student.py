@@ -3,6 +3,7 @@ from flask_login import current_user, login_required, login_user
 from app import db
 from models import Question, Submission, Evaluation, Student, User
 from forms import SubmissionForm, SimpleStudentForm
+from services.evaluation import evaluate_submissions
 import logging
 
 student_bp = Blueprint('student', __name__, url_prefix='/student')
@@ -135,7 +136,25 @@ def submit_answer(question_id):
             db.session.add(submission)
             db.session.commit()
             
-            flash('Your answer has been submitted successfully!', 'success')
+            # Automatically evaluate the submission
+            try:
+                evaluate_submissions([submission], question)
+                
+                # Update the rank for all submissions to this question
+                all_evaluations = Evaluation.query.join(Submission).filter(
+                    Submission.question_id == question.id
+                ).order_by(Evaluation.total_score.desc()).all()
+                
+                for i, eval in enumerate(all_evaluations):
+                    eval.rank = i + 1
+                
+                db.session.commit()
+                
+                flash('Your answer has been submitted and evaluated successfully!', 'success')
+            except Exception as e:
+                logging.error(f"Error evaluating submission: {str(e)}")
+                flash('Your answer has been submitted successfully, but there was an error during automatic evaluation.', 'warning')
+            
             return redirect(url_for('student.dashboard'))
         
         return render_template('student/submit_answer.html', 
@@ -197,7 +216,25 @@ def submit_answer(question_id):
                 # Clear temporary student from session
                 session.pop('temp_student', None)
                 
-                flash('Your answer has been submitted successfully!', 'success')
+                # Automatically evaluate the submission
+                try:
+                    evaluate_submissions([submission], question)
+                    
+                    # Update the rank for all submissions to this question
+                    all_evaluations = Evaluation.query.join(Submission).filter(
+                        Submission.question_id == question.id
+                    ).order_by(Evaluation.total_score.desc()).all()
+                    
+                    for i, eval in enumerate(all_evaluations):
+                        eval.rank = i + 1
+                    
+                    db.session.commit()
+                    
+                    flash('Your answer has been submitted and evaluated successfully!', 'success')
+                except Exception as e:
+                    logging.error(f"Error evaluating submission: {str(e)}")
+                    flash('Your answer has been submitted successfully, but there was an error during automatic evaluation.', 'warning')
+                
                 return redirect(url_for('student.dashboard'))
             
             return render_template('student/submit_answer.html', 

@@ -70,7 +70,7 @@
             <div>
                 {% if submissions %}
                     <form class="d-inline" method="POST" action="{{ url_for('faculty.evaluate_question', question_id=question.id) }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="csrf_token" value="{{ form.csrf_token._value() if form else '' }}">
                         <button type="submit" class="btn btn-primary" 
                                 {% if all_evaluated %}disabled{% endif %}>
                             <i class="fas fa-robot me-1"></i> 
@@ -184,7 +184,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form action="{{ url_for('faculty.delete_question', question_id=question.id) }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="csrf_token" value="{{ form.csrf_token._value() }}">
                     <button type="submit" class="btn btn-danger">Delete Question</button>
                 </form>
             </div>
