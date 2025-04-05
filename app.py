@@ -24,11 +24,22 @@ app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///essay_evaluation.db")
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-}
+db_url = os.environ.get("DATABASE_URL", "sqlite:///essay_evaluation.db")
+
+# Handle SQLite URL (SQLAlchemy 1.4+ compatibility)
+if db_url.startswith("sqlite"):
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+    # SQLite specific configurations
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "connect_args": {"check_same_thread": False}
+    }
+else:
+    # PostgreSQL configuration
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+    }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Initialize the extensions with the app
