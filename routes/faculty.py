@@ -8,6 +8,8 @@ from flask_wtf import FlaskForm
 from services.evaluation import evaluate_submissions
 from services.pdf_generator import generate_results_pdf
 import logging
+import google.generativeai as genai
+import os
 
 faculty_bp = Blueprint('faculty', __name__, url_prefix='/faculty')
 
@@ -160,6 +162,14 @@ def evaluate_question(question_id):
         
         db.session.commit()
         flash(f'Successfully evaluated {len(submissions_to_evaluate)} submissions!', 'success')
+    except ValueError as e:
+        # Specific error for API key issues
+        logging.error(f"API key error during evaluation: {str(e)}")
+        db.session.rollback()
+        if "API key" in str(e):
+            flash('Evaluation failed: The Google Gemini API key is invalid or missing. Please contact the administrator to set up a valid API key.', 'danger')
+        else:
+            flash(f'Error during evaluation: {str(e)}', 'danger')
     except Exception as e:
         logging.error(f"Evaluation error: {str(e)}")
         db.session.rollback()
@@ -235,3 +245,42 @@ def generate_pdf(question_id):
         logging.error(f"PDF generation error: {str(e)}")
         flash(f'Error generating PDF: {str(e)}', 'danger')
         return redirect(url_for('faculty.results', question_id=question.id))
+
+@faculty_bp.route('/api_status')
+@login_required
+def api_status():
+    """Check the status of the Google Gemini API."""
+    api_working = False
+    error_message = "No error details available."
+    
+    try:
+        # Get the API key from environment
+        api_key = os.environ.get("GOOGLE_API_KEY", "")
+        
+        if not api_key:
+            error_message = "Google Gemini API key is not set in environment variables. Please configure a valid API key."
+        else:
+            # Try to initialize the API
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-1.5-pro')
+            
+            # Send a simple test prompt
+            test_prompt = "Hello, this is a test of the Google Gemini API. Please respond with 'API is working'."
+            response = model.generate_content(test_prompt)
+            
+            # If we get here without an exception, the API is working
+            api_working = True
+    except Exception as e:
+        error_message = str(e)
+        logging.error(f"API status check error: {error_message}")
+    
+    return render_template('faculty/api_status.html',
+                          title='API Status',
+                          api_working=api_working,
+                          error_message=error_message)
+
+@faculty_bp.route('/test_api')
+@login_required
+def test_api():
+    """Re-test the API connection."""
+    return redirect(url_for('faculty.api_status'))

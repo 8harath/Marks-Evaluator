@@ -151,6 +151,13 @@ def submit_answer(question_id):
                 db.session.commit()
                 
                 flash('Your answer has been submitted and evaluated successfully!', 'success')
+            except ValueError as e:
+                # Specific error for API key issues
+                logging.error(f"API key error during evaluation: {str(e)}")
+                if "API key" in str(e):
+                    flash('Your answer has been submitted successfully. The evaluation system is currently unavailable - please contact your instructor.', 'warning')
+                else:
+                    flash('Your answer has been submitted successfully, but there was an error during automatic evaluation.', 'warning')
             except Exception as e:
                 logging.error(f"Error evaluating submission: {str(e)}")
                 flash('Your answer has been submitted successfully, but there was an error during automatic evaluation.', 'warning')

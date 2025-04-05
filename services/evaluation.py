@@ -6,8 +6,6 @@ import logging
 
 # Set up the Gemini API
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
-if GOOGLE_API_KEY:
-    genai.configure(api_key=GOOGLE_API_KEY)
 
 def evaluate_submissions(submissions, question):
     """
@@ -21,10 +19,17 @@ def evaluate_submissions(submissions, question):
         None (evaluations are saved to the database)
     """
     if not GOOGLE_API_KEY:
-        raise ValueError("GOOGLE_API_KEY is not set in environment variables")
+        logging.error("GOOGLE_API_KEY environment variable is not set")
+        raise ValueError("GOOGLE_API_KEY is not set in environment variables. Please configure a valid API key.")
     
-    # Configure the model
-    model = genai.GenerativeModel('gemini-pro')
+    # Configure the API with the current key - do this each time to ensure we use the latest key
+    try:
+        genai.configure(api_key=GOOGLE_API_KEY)
+        # Configure the model
+        model = genai.GenerativeModel('gemini-1.5-pro')
+    except Exception as e:
+        logging.error(f"Error configuring Gemini API: {str(e)}")
+        raise ValueError(f"Failed to initialize Gemini API: {str(e)}")
     
     for submission in submissions:
         # Skip if already evaluated
