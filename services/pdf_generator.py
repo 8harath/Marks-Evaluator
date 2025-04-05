@@ -61,7 +61,9 @@ def generate_results_pdf(question, evaluations):
     
     # Add question details
     content.append(Paragraph("Question Details", subtitle_style))
-    content.append(Paragraph(f"<b>Question:</b> {question.text}", normal_style))
+    # Replace newlines with HTML line breaks for proper PDF rendering
+    formatted_question_text = question.text.replace('\n', '<br/>')
+    content.append(Paragraph(f"<b>Question:</b> {formatted_question_text}", normal_style))
     content.append(Paragraph(f"<b>Word Limit:</b> {question.word_limit}", normal_style))
     content.append(Paragraph(f"<b>Maximum Marks:</b> {question.max_marks}", normal_style))
     content.append(Spacer(1, 12))
@@ -102,6 +104,35 @@ def generate_results_pdf(question, evaluations):
     
     content.append(table)
     content.append(Spacer(1, 12))
+    
+    # Add key answer
+    content.append(Paragraph("Key Answer (Reference Solution)", subtitle_style))
+    formatted_key_answer = question.key_answer.replace('\n', '<br/>')
+    content.append(Paragraph(formatted_key_answer, normal_style))
+    content.append(Spacer(1, 12))
+    
+    # Add detailed breakdown of submissions
+    content.append(Paragraph("Submission Details", subtitle_style))
+    
+    for i, evaluation in enumerate(evaluations):
+        submission = evaluation.submission
+        student = submission.student
+        
+        content.append(Paragraph(f"<b>{i+1}. {student.username}</b> (Score: {evaluation.total_score:.1f}, Rank: {evaluation.rank or '-'})", 
+                                  ParagraphStyle(name='SubmissionHeader', parent=normal_style, fontName='Helvetica-Bold')))
+        
+        # Format student's answer with line breaks
+        formatted_answer = submission.answer_text.replace('\n', '<br/>')
+        content.append(Paragraph(formatted_answer, normal_style))
+        
+        # Add feedback if available
+        if evaluation.feedback:
+            content.append(Paragraph("<b>AI Feedback:</b>", normal_style))
+            formatted_feedback = evaluation.feedback.replace('\n', '<br/>')
+            content.append(Paragraph(formatted_feedback, 
+                                     ParagraphStyle(name='FeedbackStyle', parent=normal_style, leftIndent=20)))
+        
+        content.append(Spacer(1, 12))
     
     # Add statistics
     if evaluations:

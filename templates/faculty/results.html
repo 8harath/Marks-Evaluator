@@ -11,7 +11,7 @@
         <div class="card bg-dark">
             <div class="card-body">
                 <h4 class="card-title">Question</h4>
-                <p class="card-text">{{ question.text }}</p>
+                <p class="card-text">{{ question.text|nl2br|safe }}</p>
                 <div class="d-flex justify-content-between mt-3">
                     <div class="small text-muted">Word Limit: {{ question.word_limit }}</div>
                     <div class="small text-muted">Max Marks: {{ question.max_marks }}</div>
@@ -152,7 +152,7 @@
                     <div class="mb-3">
                         <h6>Student's Answer:</h6>
                         <div class="p-2 bg-secondary bg-opacity-10 rounded" style="max-height: 200px; overflow-y: auto;">
-                            {{ evaluation.submission.answer_text|truncate(300) }}
+                            {{ evaluation.submission.answer_text|truncate(300)|nl2br|safe }}
                         </div>
                     </div>
                     
@@ -160,7 +160,7 @@
                         <div>
                             <h6>AI Feedback:</h6>
                             <div class="p-2 bg-secondary bg-opacity-10 rounded" style="max-height: 150px; overflow-y: auto;">
-                                {{ evaluation.feedback|truncate(200) }}
+                                {{ evaluation.feedback|truncate(200)|nl2br|safe }}
                             </div>
                         </div>
                     {% endif %}
@@ -189,7 +189,7 @@
                         <div class="mb-4">
                             <h6>Student's Answer:</h6>
                             <div class="p-3 bg-secondary bg-opacity-10 rounded">
-                                {{ evaluation.submission.answer_text|nl2br }}
+                                {{ evaluation.submission.answer_text|nl2br|safe }}
                             </div>
                         </div>
                         
@@ -245,7 +245,7 @@
                             <div class="mt-4">
                                 <h6>AI Feedback:</h6>
                                 <div class="p-3 bg-secondary bg-opacity-10 rounded">
-                                    {{ evaluation.feedback|nl2br }}
+                                    {{ evaluation.feedback|nl2br|safe }}
                                 </div>
                             </div>
                         {% endif %}

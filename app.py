@@ -56,6 +56,14 @@ login_manager.login_message_category = 'info'
 def inject_now():
     return {'now': datetime.now()}
 
+# Add custom Jinja2 filters
+@app.template_filter('nl2br')
+def nl2br(value):
+    """Convert newlines to <br> tags."""
+    if value:
+        return value.replace('\n', '<br>\n')
+    return ''
+
 with app.app_context():
     # Import models
     from models import User, Faculty, Student, Question, Submission, Evaluation

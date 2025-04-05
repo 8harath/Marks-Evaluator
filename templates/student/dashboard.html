@@ -59,7 +59,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <p class="card-text">{{ item.question.text|truncate(150) }}</p>
+                        <p class="card-text">{{ item.question.text|nl2br|safe|truncate(150) }}</p>
                         
                         <div class="d-flex justify-content-between mt-3">
                             <span class="badge bg-info">Word Limit: {{ item.question.word_limit }}</span>

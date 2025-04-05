@@ -13,7 +13,7 @@
                 <h4 class="mb-0">Question</h4>
             </div>
             <div class="card-body">
-                <p class="card-text">{{ question.text }}</p>
+                <p class="card-text">{{ question.text|nl2br|safe }}</p>
                 
                 <div class="row">
                     <div class="col-md-6">

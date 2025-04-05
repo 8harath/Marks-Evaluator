@@ -52,12 +52,12 @@
                         <div class="row mb-4">
                             <div class="col-lg-8">
                                 <h6>Question:</h6>
-                                <p class="mb-4">{{ evaluation.submission.question.text }}</p>
+                                <p class="mb-4">{{ evaluation.submission.question.text|nl2br|safe }}</p>
                                 
                                 <div class="mb-4">
                                     <h6>Your Answer:</h6>
                                     <div class="p-3 bg-secondary bg-opacity-10 rounded" style="max-height: 200px; overflow-y: auto;">
-                                        {{ evaluation.submission.answer_text|truncate(300) }}
+                                        {{ evaluation.submission.answer_text|truncate(300)|nl2br|safe }}
                                         {% if evaluation.submission.answer_text|length > 300 %}
                                             <a href="#submissionModal{{ evaluation.submission.id }}" data-bs-toggle="modal" class="d-block text-end mt-2">
                                                 View Full Answer
@@ -70,7 +70,7 @@
                                     <div>
                                         <h6>AI Feedback:</h6>
                                         <div class="p-3 bg-secondary bg-opacity-10 rounded" style="max-height: 150px; overflow-y: auto;">
-                                            {{ evaluation.feedback|truncate(200) }}
+                                            {{ evaluation.feedback|truncate(200)|nl2br|safe }}
                                             {% if evaluation.feedback|length > 200 %}
                                                 <a href="#submissionModal{{ evaluation.submission.id }}" data-bs-toggle="modal" class="d-block text-end mt-2">
                                                     View Full Feedback
@@ -170,7 +170,7 @@
                                 <div class="mb-4">
                                     <h6>Your Answer:</h6>
                                     <div class="p-3 bg-secondary bg-opacity-10 rounded">
-                                        {{ evaluation.submission.answer_text|nl2br }}
+                                        {{ evaluation.submission.answer_text|nl2br|safe }}
                                     </div>
                                 </div>
                                 
@@ -226,7 +226,7 @@
                                     <div class="mt-4">
                                         <h6>AI Feedback:</h6>
                                         <div class="p-3 bg-secondary bg-opacity-10 rounded">
-                                            {{ evaluation.feedback|nl2br }}
+                                            {{ evaluation.feedback|nl2br|safe }}
                                         </div>
                                     </div>
                                 {% endif %}
